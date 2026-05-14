@@ -2,3 +2,4 @@
 .agent/
 __pycache__/
 *.pyc
+DEVELOPMENT_LOG.md
