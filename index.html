@@ -101,9 +101,9 @@
                     <a href="#contact" class="text-sm font-medium hover:text-white transition-colors">Contact</a>
                 </nav>
                 <div class="flex items-center space-x-4">
-                    <a href="MyCV-2026-protected.pdf" download class="hidden sm:inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-500 transition-colors shadow-lg shadow-brand-500/30">
+                    <button type="button" onclick="openPasswordModal()" class="hidden sm:inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-500 transition-colors shadow-lg shadow-brand-500/30 cursor-pointer">
                         <i data-lucide="download" class="w-4 h-4 mr-2"></i> Download CV
-                    </a>
+                    </button>
                     <!-- Mobile Menu Button -->
                     <button class="md:hidden text-slate-300 hover:text-white">
                         <i data-lucide="menu" class="w-6 h-6"></i>
@@ -403,9 +403,116 @@
         </div>
     </footer>
 
+    <!-- Password Protection Modal -->
+    <div id="passwordModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-950/80 backdrop-blur-md p-4 transition-all duration-300">
+        <div class="relative w-full max-w-md bg-slate-900 border border-slate-700/80 rounded-2xl p-6 sm:p-8 shadow-2xl shadow-slate-950">
+            <!-- Close Button -->
+            <button type="button" onclick="closePasswordModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-slate-800 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 rounded-full bg-brand-500/10 text-brand-400 flex items-center justify-center mx-auto mb-4 border border-brand-500/20">
+                    <i data-lucide="lock" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Protected Document</h3>
+                <p class="text-sm text-slate-400 mt-1">Please enter the password to download the CV</p>
+            </div>
+
+            <form id="passwordForm" onsubmit="handlePasswordSubmit(event)">
+                <div class="mb-5">
+                    <label for="pdfPasswordInput" class="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Password</label>
+                    <div class="relative">
+                        <input type="password" id="pdfPasswordInput" placeholder="Enter password" autocomplete="off" required
+                            class="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all text-sm pr-10">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-1">
+                            <i data-lucide="eye" id="togglePasswordIcon" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <p id="passwordError" class="hidden text-xs text-rose-400 mt-2 flex items-center">
+                        <i data-lucide="alert-circle" class="w-3.5 h-3.5 mr-1 inline"></i> Incorrect password. Please try again.
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <button type="button" onclick="closePasswordModal()" class="w-1/2 py-2.5 px-4 rounded-xl text-sm font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit" class="w-1/2 py-2.5 px-4 rounded-xl text-sm font-medium text-white bg-brand-600 hover:bg-brand-500 transition-colors shadow-lg shadow-brand-500/25 flex items-center justify-center">
+                        <i data-lucide="download" class="w-4 h-4 mr-2"></i> Download
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // Initialize Lucide Icons
         lucide.createIcons();
+
+        // Password Modal Logic
+        function openPasswordModal() {
+            const modal = document.getElementById('passwordModal');
+            const input = document.getElementById('pdfPasswordInput');
+            const errorMsg = document.getElementById('passwordError');
+            errorMsg.classList.add('hidden');
+            input.classList.remove('border-rose-500');
+            input.value = '';
+            modal.classList.remove('hidden');
+            setTimeout(() => input.focus(), 100);
+        }
+
+        function closePasswordModal() {
+            const modal = document.getElementById('passwordModal');
+            modal.classList.add('hidden');
+        }
+
+        function togglePasswordVisibility() {
+            const input = document.getElementById('pdfPasswordInput');
+            const icon = document.getElementById('togglePasswordIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.setAttribute('data-lucide', 'eye-off');
+            } else {
+                input.type = 'password';
+                icon.setAttribute('data-lucide', 'eye');
+            }
+            lucide.createIcons();
+        }
+
+        function handlePasswordSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('pdfPasswordInput');
+            const errorMsg = document.getElementById('passwordError');
+            const enteredPassword = input.value.trim();
+
+            if (enteredPassword === 'cv2026') {
+                errorMsg.classList.add('hidden');
+                closePasswordModal();
+                
+                // Trigger download of protected PDF
+                const link = document.createElement('a');
+                link.href = 'MyCV-2026-protected.pdf';
+                link.download = 'MyCV-2026-protected.pdf';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                errorMsg.classList.remove('hidden');
+                input.classList.add('border-rose-500');
+                lucide.createIcons();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closePasswordModal();
+        });
+
+        document.getElementById('passwordModal')?.addEventListener('click', (e) => {
+            if (e.target === document.getElementById('passwordModal')) {
+                closePasswordModal();
+            }
+        });
 
         // Scroll Reveal Animations
         const revealOptions = {
